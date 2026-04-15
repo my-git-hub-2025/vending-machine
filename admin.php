@@ -102,14 +102,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $previous = $assignments[$slotKey] ?? null;
 
             $totals = getAssignedQuantitiesByProduct($assignments);
+            $currentTotal = (int)($totals[$productId] ?? 0);
             if ($previous && (int)$previous['product_id'] === $productId) {
-                $totals[$productId] = max(0, (int)($totals[$productId] ?? 0) - (int)$previous['quantity']);
+                $currentTotal -= (int)$previous['quantity'];
             }
 
-            $availableStock = max(0, (int)$product['stock'] - (int)($totals[$productId] ?? 0));
-            if ($quantity > $availableStock) {
+            if ($currentTotal < 0) {
+                $errors[] = 'Stock assignment data is inconsistent. Please review existing slot quantities.';
+            }
+
+            $availableStock = (int)$product['stock'] - $currentTotal;
+            if (count($errors) === 0 && $quantity > $availableStock) {
                 $errors[] = 'Assigned quantity exceeds remaining stock for this product.';
-            } else {
+            } elseif (count($errors) === 0) {
                 $assignments[$slotKey] = [
                     'column' => $column,
                     'slot' => $slot,
