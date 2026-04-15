@@ -23,6 +23,7 @@ class AuthSystem:
         self._dummy_stored_password = f"{self._DUMMY_SALT_HEX}${dummy_derived_key}"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.db_path.touch(exist_ok=True)
+        self.db_path.chmod(0o600)
 
     @staticmethod
     def _hash_password(password: str) -> str:
@@ -96,4 +97,5 @@ class AuthSystem:
         return True
 
     def is_logged_in(self, username: str) -> bool:
-        return username in self.logged_in_users
+        users = self._load_users()
+        return username in users and username in self.logged_in_users
