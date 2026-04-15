@@ -199,10 +199,10 @@ layoutHeader('Admin Panel');
                                         <div class="col-4"><input class="form-control form-control-sm" name="name" value="<?= h((string)$product['name']) ?>" required></div>
                                         <div class="col-3"><input type="number" min="0" step="0.01" class="form-control form-control-sm" name="price" value="<?= h((string)$product['price']) ?>" required></div>
                                         <div class="col-3"><input type="number" min="0" class="form-control form-control-sm" name="stock" value="<?= h((string)$product['stock']) ?>" required></div>
-                                         <div class="col-2"><button class="btn btn-sm btn-vm-secondary w-100">Update</button></div>
-                                     </form>
-                                 </td>
-                             </tr>
+                                        <div class="col-2"><button class="btn btn-sm btn-vm-secondary w-100">Update</button></div>
+                                    </form>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                         <?php if (count($products) === 0): ?><tr><td colspan="4" class="text-muted">No products yet.</td></tr><?php endif; ?>
                         </tbody>

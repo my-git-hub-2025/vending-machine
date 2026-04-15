@@ -17,7 +17,12 @@
     --vm-shadow-md: 0 18px 44px rgba(32, 50, 120, 0.15);
 }
 
-* {
+.btn,
+.card,
+.list-group-item,
+.badge,
+.form-control,
+.form-select {
     transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
@@ -159,7 +164,6 @@ body.vm-app {
     border-radius: 999px;
     font-weight: 700;
     min-width: 78px;
-    animation: vm-pulse 1.5s ease-in-out infinite;
 }
 
 .vm-stock-badge.stock-high {
@@ -170,11 +174,13 @@ body.vm-app {
 .vm-stock-badge.stock-low {
     background: rgba(243, 160, 19, 0.2);
     color: #a46800;
+    animation: vm-pulse 2s ease-in-out infinite;
 }
 
 .vm-stock-badge.stock-out {
     background: rgba(214, 69, 69, 0.18);
     color: var(--vm-danger);
+    animation: vm-pulse 1.7s ease-in-out infinite;
 }
 
 .vm-skeleton {
@@ -235,5 +241,13 @@ body.vm-app {
     .vm-nav-actions .btn {
         font-size: .78rem;
         padding: .25rem .6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vm-column-card,
+    .vm-stock-badge,
+    .vm-skeleton::after {
+        animation: none !important;
     }
 }
