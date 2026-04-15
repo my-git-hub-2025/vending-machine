@@ -49,12 +49,12 @@ layoutHeader('Login');
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input class="form-control" name="username" required>
+                        <label class="form-label" for="username">Username</label>
+                        <input id="username" class="form-control" name="username" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input class="form-control" type="password" name="password" required>
+                        <label class="form-label" for="password">Password</label>
+                        <input id="password" class="form-control" type="password" name="password" required>
                     </div>
                     <button class="btn btn-primary w-100">Sign in</button>
                 </form>
