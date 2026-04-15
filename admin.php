@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $products = getProducts();
             $updated = false;
+            $created = false;
             if ($id <= 0) {
                 $products[] = [
                     'id' => nextId($products),
@@ -62,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'price' => $price,
                     'stock' => $stock,
                 ];
+                $created = true;
             } else {
                 foreach ($products as &$product) {
                     if ((int)$product['id'] === $id) {
@@ -78,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if (count($errors) === 0) {
                 saveProducts($products);
-                $success = 'Product stock updated.';
+                $success = $created ? 'Product created.' : 'Product updated.';
             }
         }
     }

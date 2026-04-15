@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+session_set_cookie_params([
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
 session_start();
 
 const DATA_DIR = __DIR__ . '/../data';
@@ -15,7 +20,7 @@ initializeDataFiles();
 function initializeDataFiles(): void
 {
     if (!is_dir(DATA_DIR)) {
-        mkdir(DATA_DIR, 0755, true);
+        mkdir(DATA_DIR, 0750, true);
     }
 
     if (!file_exists(USERS_FILE)) {
@@ -52,7 +57,15 @@ function readJsonFile(string $path, mixed $default): mixed
 
 function writeJsonFile(string $path, mixed $data): void
 {
-    file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
+    $encoded = json_encode($data, JSON_PRETTY_PRINT);
+    if ($encoded === false) {
+        throw new RuntimeException('Failed to encode JSON data.');
+    }
+
+    $result = file_put_contents($path, $encoded, LOCK_EX);
+    if ($result === false) {
+        throw new RuntimeException('Failed to write data file: ' . $path);
+    }
 }
 
 function h(string $value): string
