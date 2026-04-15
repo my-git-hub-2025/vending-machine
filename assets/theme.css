@@ -15,6 +15,9 @@
     --vm-radius-xl: 1.35rem;
     --vm-shadow-sm: 0 8px 25px rgba(32, 50, 120, 0.12);
     --vm-shadow-md: 0 18px 44px rgba(32, 50, 120, 0.15);
+    --vm-pulse-iterations: 3;
+    --vm-pulse-low-duration: 2s;
+    --vm-pulse-out-duration: 1.7s;
 }
 
 .btn,
@@ -178,13 +181,13 @@ body.vm-app {
 .vm-stock-badge.stock-low {
     background: rgba(243, 160, 19, 0.2);
     color: #a46800;
-    animation: vm-pulse 2s ease-in-out 3;
+    animation: vm-pulse var(--vm-pulse-low-duration) ease-in-out var(--vm-pulse-iterations);
 }
 
 .vm-stock-badge.stock-out {
     background: rgba(214, 69, 69, 0.18);
     color: var(--vm-danger);
-    animation: vm-pulse 1.7s ease-in-out 3;
+    animation: vm-pulse var(--vm-pulse-out-duration) ease-in-out var(--vm-pulse-iterations);
 }
 
 .vm-skeleton {
