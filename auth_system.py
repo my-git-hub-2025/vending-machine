@@ -8,11 +8,19 @@ from pathlib import Path
 
 class AuthSystem:
     _PBKDF2_ITERATIONS = 600_000
+    _DUMMY_SALT_HEX = "0" * 32
+    _DUMMY_PASSWORD = "dummy-password"
 
     def __init__(self, db_path: str = "users.txt") -> None:
         self.db_path = Path(db_path)
         self.logged_in_users: set[str] = set()
-        self._dummy_stored_password = self._hash_password(secrets.token_urlsafe(32))
+        dummy_derived_key = hashlib.pbkdf2_hmac(
+            "sha256",
+            self._DUMMY_PASSWORD.encode("utf-8"),
+            bytes.fromhex(self._DUMMY_SALT_HEX),
+            self._PBKDF2_ITERATIONS,
+        ).hex()
+        self._dummy_stored_password = f"{self._DUMMY_SALT_HEX}${dummy_derived_key}"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.db_path.touch(exist_ok=True)
 

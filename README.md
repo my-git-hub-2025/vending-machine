@@ -2,6 +2,8 @@
 
 Simple user login/logout system with a text-file database.
 
+Session state is in-memory only (users are logged out when the process restarts).
+
 ## Files
 - `auth_system.py`: login/logout implementation
 - `users.txt`: text-file user database (created automatically)
@@ -23,4 +25,4 @@ auth.logout("alice")
 ```
 
 ## Note
-- Login sessions are kept in memory for the running process only.
+- Login sessions are not persisted across restarts.
