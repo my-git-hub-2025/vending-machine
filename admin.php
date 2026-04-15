@@ -136,14 +136,17 @@ $slotsCsv = implode(',', array_map(static fn ($v): string => (string)$v, $config
 
 layoutHeader('Admin Panel');
 ?>
-<h1 class="h3 mb-3"><i class="fa-solid fa-screwdriver-wrench"></i> Admin Panel</h1>
+<div class="hero-panel p-4 mb-4">
+    <h1 class="vm-page-title mb-2"><i class="fa-solid fa-screwdriver-wrench"></i> Admin Panel</h1>
+    <p class="mb-0 vm-subtle">Configure machine shape, manage stock, and map slot assignments from one place.</p>
+</div>
 
 <?php foreach ($errors as $error): ?><div class="alert alert-danger"><?= h($error) ?></div><?php endforeach; ?>
 <?php if ($success): ?><div class="alert alert-success"><?= h($success) ?></div><?php endif; ?>
 
 <div class="row g-4">
     <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card surface-card h-100">
             <div class="card-body">
                 <h2 class="h5">Machine Configuration</h2>
                 <form method="post" class="vstack gap-2">
@@ -162,14 +165,14 @@ layoutHeader('Admin Panel');
                         <input class="form-control" name="slots_per_column" value="<?= h($slotsCsv) ?>" required>
                         <small class="text-muted">Example for 4 columns: 5,5,6,4</small>
                     </div>
-                    <button class="btn btn-primary">Save configuration</button>
+                    <button class="btn btn-vm-primary">Save configuration</button>
                 </form>
             </div>
         </div>
     </div>
 
     <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card surface-card h-100">
             <div class="card-body">
                 <h2 class="h5">Stock Products</h2>
                 <form method="post" class="vstack gap-2 mb-3">
@@ -179,7 +182,7 @@ layoutHeader('Admin Panel');
                     <input class="form-control" name="name" placeholder="Product name" required>
                     <input type="number" step="0.01" min="0" class="form-control" name="price" placeholder="Price" required>
                     <input type="number" min="0" class="form-control" name="stock" placeholder="Stock quantity" required>
-                    <button class="btn btn-success">Add product</button>
+                    <button class="btn btn-vm-primary">Add product</button>
                 </form>
 
                 <div class="table-responsive">
@@ -196,10 +199,10 @@ layoutHeader('Admin Panel');
                                         <div class="col-4"><input class="form-control form-control-sm" name="name" value="<?= h((string)$product['name']) ?>" required></div>
                                         <div class="col-3"><input type="number" min="0" step="0.01" class="form-control form-control-sm" name="price" value="<?= h((string)$product['price']) ?>" required></div>
                                         <div class="col-3"><input type="number" min="0" class="form-control form-control-sm" name="stock" value="<?= h((string)$product['stock']) ?>" required></div>
-                                        <div class="col-2"><button class="btn btn-sm btn-outline-primary w-100">Update</button></div>
-                                    </form>
-                                </td>
-                            </tr>
+                                         <div class="col-2"><button class="btn btn-sm btn-vm-secondary w-100">Update</button></div>
+                                     </form>
+                                 </td>
+                             </tr>
                         <?php endforeach; ?>
                         <?php if (count($products) === 0): ?><tr><td colspan="4" class="text-muted">No products yet.</td></tr><?php endif; ?>
                         </tbody>
@@ -210,7 +213,7 @@ layoutHeader('Admin Panel');
     </div>
 
     <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card surface-card h-100">
             <div class="card-body">
                 <h2 class="h5">Assign Slot</h2>
                 <form method="post" class="vstack gap-2">
@@ -237,7 +240,7 @@ layoutHeader('Admin Panel');
                         <label class="form-label">Quantity in slot</label>
                         <input type="number" class="form-control" min="0" name="quantity" required>
                     </div>
-                    <button class="btn btn-warning">Save assignment</button>
+                    <button class="btn btn-vm-primary">Save assignment</button>
                 </form>
 
                 <hr>

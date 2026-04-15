@@ -8,6 +8,11 @@ function layoutHeader(string $title): void
 {
     $user = currentUser();
     sendSecurityHeaders();
+    $path = parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '';
+    $onIndex = $path === '/index.php' || $path === '/';
+    $onAdmin = $path === '/admin.php';
+    $onLogin = $path === '/login.php';
+    $onRegister = $path === '/register.php';
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -17,21 +22,23 @@ function layoutHeader(string $title): void
         <title><?= h($title) ?></title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        <link rel="stylesheet" href="/assets/theme.css">
     </head>
-    <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <body class="vm-app">
+    <nav class="navbar navbar-expand-lg navbar-dark vm-navbar mb-4">
         <div class="container">
-            <a class="navbar-brand" href="/index.php"><i class="fa-solid fa-store"></i> Vending Machine</a>
-            <div class="ms-auto text-white d-flex gap-2 align-items-center">
+            <a class="navbar-brand fw-semibold vm-brand" href="/index.php"><i class="fa-solid fa-store"></i> Vending Machine</a>
+            <div class="ms-auto text-white d-flex gap-2 align-items-center vm-nav-actions">
+                <a class="btn btn-sm btn-outline-light <?= $onIndex ? 'active' : '' ?>" href="/index.php">Machine</a>
                 <?php if ($user): ?>
                     <span class="small">Hi, <?= h($user['username']) ?> (<?= h($user['role']) ?>)</span>
                     <?php if (isAdmin()): ?>
-                        <a class="btn btn-sm btn-warning" href="/admin.php"><i class="fa-solid fa-gear"></i> Admin</a>
+                        <a class="btn btn-sm btn-vm-primary <?= $onAdmin ? 'active' : '' ?>" href="/admin.php"><i class="fa-solid fa-gear"></i> Admin</a>
                     <?php endif; ?>
                     <a class="btn btn-sm btn-outline-light" href="/logout.php">Logout</a>
                 <?php else: ?>
-                    <a class="btn btn-sm btn-outline-light" href="/login.php">Login</a>
-                    <a class="btn btn-sm btn-success" href="/register.php">Register</a>
+                    <a class="btn btn-sm btn-vm-secondary <?= $onLogin ? 'active' : '' ?>" href="/login.php">Login</a>
+                    <a class="btn btn-sm btn-vm-primary <?= $onRegister ? 'active' : '' ?>" href="/register.php">Register</a>
                 <?php endif; ?>
             </div>
         </div>
