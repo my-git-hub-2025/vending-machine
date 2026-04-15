@@ -109,20 +109,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($currentTotal < 0) {
                 $errors[] = 'Stock assignment data is inconsistent. Please review existing slot quantities.';
-            }
-
-            $availableStock = (int)$product['stock'] - $currentTotal;
-            if (count($errors) === 0 && $quantity > $availableStock) {
-                $errors[] = 'Assigned quantity exceeds remaining stock for this product.';
-            } elseif (count($errors) === 0) {
-                $assignments[$slotKey] = [
-                    'column' => $column,
-                    'slot' => $slot,
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                ];
-                saveAssignments($assignments);
-                $success = 'Slot assignment saved.';
+            } else {
+                $availableStock = (int)$product['stock'] - $currentTotal;
+                if ($quantity > $availableStock) {
+                    $errors[] = 'Assigned quantity exceeds remaining stock for this product.';
+                } else {
+                    $assignments[$slotKey] = [
+                        'column' => $column,
+                        'slot' => $slot,
+                        'product_id' => $productId,
+                        'quantity' => $quantity,
+                    ];
+                    saveAssignments($assignments);
+                    $success = 'Slot assignment saved.';
+                }
             }
         }
     }

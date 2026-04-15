@@ -20,7 +20,7 @@ initializeDataFiles();
 function initializeDataFiles(): void
 {
     if (!is_dir(DATA_DIR)) {
-        mkdir(DATA_DIR, 0700, true);
+        mkdir(DATA_DIR, 0750, true);
     }
 
     if (!file_exists(USERS_FILE)) {
