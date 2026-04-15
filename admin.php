@@ -109,11 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Assigned quantity exceeds remaining stock for this product.';
             } else {
                 $assignments[$slotKey] = [
-                'column' => $column,
-                'slot' => $slot,
-                'product_id' => $productId,
-                'quantity' => $quantity,
-            ];
+                    'column' => $column,
+                    'slot' => $slot,
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                ];
                 saveAssignments($assignments);
                 $success = 'Slot assignment saved.';
             }

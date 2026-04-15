@@ -15,10 +15,10 @@ Simple PHP vending machine website with Bootstrap and Font Awesome.
 
 ## Data files
 
-- `/home/runner/work/vending-machine/vending-machine/data/users.txt`
-- `/home/runner/work/vending-machine/vending-machine/data/machine_config.txt`
-- `/home/runner/work/vending-machine/vending-machine/data/products.txt`
-- `/home/runner/work/vending-machine/vending-machine/data/slot_assignments.txt`
+- `data/users.txt`
+- `data/machine_config.txt`
+- `data/products.txt`
+- `data/slot_assignments.txt`
 
 ## Run locally
 
