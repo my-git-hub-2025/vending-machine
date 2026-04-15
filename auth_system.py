@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import secrets
 from pathlib import Path
 
 
@@ -13,7 +15,27 @@ class AuthSystem:
 
     @staticmethod
     def _hash_password(password: str) -> str:
-        return hashlib.sha256(password.encode("utf-8")).hexdigest()
+        salt = secrets.token_hex(16)
+        derived_key = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            bytes.fromhex(salt),
+            200_000,
+        ).hex()
+        return f"{salt}${derived_key}"
+
+    @staticmethod
+    def _verify_password(password: str, stored_password: str) -> bool:
+        if "$" not in stored_password:
+            return False
+        salt, expected_derived_key = stored_password.split("$", 1)
+        derived_key = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            bytes.fromhex(salt),
+            200_000,
+        ).hex()
+        return hmac.compare_digest(derived_key, expected_derived_key)
 
     def _load_users(self) -> dict[str, str]:
         users: dict[str, str] = {}
@@ -45,7 +67,7 @@ class AuthSystem:
         users = self._load_users()
         if username not in users:
             return False
-        if users[username] != self._hash_password(password):
+        if not self._verify_password(password, users[username]):
             return False
         self.logged_in_users.add(username)
         return True

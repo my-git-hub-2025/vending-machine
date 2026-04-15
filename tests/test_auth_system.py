@@ -31,6 +31,10 @@ class AuthSystemTests(unittest.TestCase):
         self.assertFalse(self.auth.login("alice", "wrong"))
         self.assertFalse(self.auth.is_logged_in("alice"))
 
+    def test_login_nonexistent_user_fails(self) -> None:
+        self.assertFalse(self.auth.login("ghost", "secret"))
+        self.assertFalse(self.auth.is_logged_in("ghost"))
+
     def test_logout_success(self) -> None:
         self.auth.register_user("alice", "secret")
         self.auth.login("alice", "secret")
@@ -40,6 +44,12 @@ class AuthSystemTests(unittest.TestCase):
     def test_logout_when_not_logged_in_fails(self) -> None:
         self.auth.register_user("alice", "secret")
         self.assertFalse(self.auth.logout("alice"))
+
+    def test_register_user_empty_username_fails(self) -> None:
+        self.assertFalse(self.auth.register_user("", "secret"))
+
+    def test_register_user_empty_password_fails(self) -> None:
+        self.assertFalse(self.auth.register_user("alice", ""))
 
 
 if __name__ == "__main__":

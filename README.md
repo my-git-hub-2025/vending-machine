@@ -21,3 +21,6 @@ auth.register_user("alice", "secret123")
 auth.login("alice", "secret123")
 auth.logout("alice")
 ```
+
+## Note
+- Login sessions are kept in memory for the running process only.
