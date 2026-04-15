@@ -8,7 +8,14 @@ session_unset();
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
     $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 3600, $params['path'], $params['domain'], (bool)$params['secure'], (bool)$params['httponly']);
+    setcookie(session_name(), '', [
+        'expires' => time() - 3600,
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => (bool)$params['secure'],
+        'httponly' => (bool)$params['httponly'],
+        'samesite' => $params['samesite'] ?? 'Strict',
+    ]);
 }
 session_destroy();
 
