@@ -8,7 +8,7 @@ function layoutHeader(string $title): void
 {
     $user = currentUser();
     sendSecurityHeaders();
-    $path = parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '';
+    $path = (string)($_SERVER['SCRIPT_NAME'] ?? '');
     $onIndex = $path === '/index.php' || $path === '/';
     $onAdmin = $path === '/admin.php';
     $onLogin = $path === '/login.php';

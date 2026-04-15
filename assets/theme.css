@@ -18,12 +18,16 @@
 }
 
 .btn,
-.card,
 .list-group-item,
 .badge,
 .form-control,
 .form-select {
-    transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.vm-slot-item,
+.btn {
+    transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease, color .2s ease;
 }
 
 body.vm-app {
@@ -174,13 +178,13 @@ body.vm-app {
 .vm-stock-badge.stock-low {
     background: rgba(243, 160, 19, 0.2);
     color: #a46800;
-    animation: vm-pulse 2s ease-in-out infinite;
+    animation: vm-pulse 2s ease-in-out 3;
 }
 
 .vm-stock-badge.stock-out {
     background: rgba(214, 69, 69, 0.18);
     color: var(--vm-danger);
-    animation: vm-pulse 1.7s ease-in-out infinite;
+    animation: vm-pulse 1.7s ease-in-out 3;
 }
 
 .vm-skeleton {
@@ -197,6 +201,13 @@ body.vm-app {
     transform: translateX(-100%);
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
     animation: vm-shimmer 1.5s infinite;
+}
+
+.vm-empty-state {
+    display: inline-block;
+    border-radius: .5rem;
+    background: rgba(169, 182, 235, 0.18);
+    color: var(--vm-muted);
 }
 
 .form-control, .form-select {

@@ -67,7 +67,7 @@ layoutHeader('Vending Machine');
                                     <div><?= h((string)$product['name']) ?></div>
                                     <small class="vm-price">$<?= h(number_format((float)$product['price'], 2)) ?></small>
                                 <?php else: ?>
-                                    <small class="vm-subtle d-inline-block vm-skeleton px-3 py-1">Empty</small>
+                                    <small class="vm-empty-state px-3 py-1">Empty</small>
                                 <?php endif; ?>
                                 </div>
                             </div>
