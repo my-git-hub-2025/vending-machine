@@ -164,6 +164,20 @@ function findProductById(int $id): ?array
     return null;
 }
 
+function getAssignedQuantitiesByProduct(array $assignments): array
+{
+    $totals = [];
+    foreach ($assignments as $assignment) {
+        $productId = (int)($assignment['product_id'] ?? 0);
+        $quantity = max(0, (int)($assignment['quantity'] ?? 0));
+        if ($productId <= 0) {
+            continue;
+        }
+        $totals[$productId] = ($totals[$productId] ?? 0) + $quantity;
+    }
+    return $totals;
+}
+
 function nextId(array $rows): int
 {
     $max = 0;

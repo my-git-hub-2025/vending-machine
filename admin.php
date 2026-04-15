@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Product name and a valid price are required.';
         } else {
             $products = getProducts();
+            $updated = false;
             if ($id <= 0) {
                 $products[] = [
                     'id' => nextId($products),
@@ -67,12 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $product['name'] = $name;
                         $product['price'] = $price;
                         $product['stock'] = $stock;
+                        $updated = true;
                     }
                 }
                 unset($product);
+                if (!$updated) {
+                    $errors[] = 'Product not found for update.';
+                }
             }
-            saveProducts($products);
-            $success = 'Product stock updated.';
+            if (count($errors) === 0) {
+                saveProducts($products);
+                $success = 'Product stock updated.';
+            }
         }
     }
 
@@ -85,18 +92,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $config = getMachineConfig();
         if ($column > (int)$config['columns'] || $slot > (int)$config['slots_per_column'][$column]) {
             $errors[] = 'Invalid column or slot.';
-        } elseif (!findProductById($productId)) {
+        } elseif (!($product = findProductById($productId))) {
             $errors[] = 'Selected product does not exist.';
         } else {
             $assignments = getAssignments();
-            $assignments[$column . '-' . $slot] = [
+            $slotKey = $column . '-' . $slot;
+            $previous = $assignments[$slotKey] ?? null;
+
+            $totals = getAssignedQuantitiesByProduct($assignments);
+            if ($previous && (int)$previous['product_id'] === $productId) {
+                $totals[$productId] = max(0, (int)($totals[$productId] ?? 0) - (int)$previous['quantity']);
+            }
+
+            $availableStock = max(0, (int)$product['stock'] - (int)($totals[$productId] ?? 0));
+            if ($quantity > $availableStock) {
+                $errors[] = 'Assigned quantity exceeds remaining stock for this product.';
+            } else {
+                $assignments[$slotKey] = [
                 'column' => $column,
                 'slot' => $slot,
                 'product_id' => $productId,
                 'quantity' => $quantity,
             ];
-            saveAssignments($assignments);
-            $success = 'Slot assignment saved.';
+                saveAssignments($assignments);
+                $success = 'Slot assignment saved.';
+            }
         }
     }
 }
@@ -154,16 +174,23 @@ layoutHeader('Admin Panel');
 
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
-                        <thead><tr><th>Item</th><th>Price</th><th>Stock</th></tr></thead>
+                        <thead><tr><th>Item</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
                         <tbody>
                         <?php foreach ($products as $product): ?>
                             <tr>
-                                <td><?= h((string)$product['name']) ?></td>
-                                <td>$<?= h(number_format((float)$product['price'], 2)) ?></td>
-                                <td><?= h((string)(int)$product['stock']) ?></td>
+                                <td colspan="4">
+                                    <form method="post" class="row g-1 align-items-center">
+                                        <input type="hidden" name="action" value="save_product">
+                                        <input type="hidden" name="product_id" value="<?= h((string)$product['id']) ?>">
+                                        <div class="col-4"><input class="form-control form-control-sm" name="name" value="<?= h((string)$product['name']) ?>" required></div>
+                                        <div class="col-3"><input type="number" min="0" step="0.01" class="form-control form-control-sm" name="price" value="<?= h((string)$product['price']) ?>" required></div>
+                                        <div class="col-3"><input type="number" min="0" class="form-control form-control-sm" name="stock" value="<?= h((string)$product['stock']) ?>" required></div>
+                                        <div class="col-2"><button class="btn btn-sm btn-outline-primary w-100">Update</button></div>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
-                        <?php if (count($products) === 0): ?><tr><td colspan="3" class="text-muted">No products yet.</td></tr><?php endif; ?>
+                        <?php if (count($products) === 0): ?><tr><td colspan="4" class="text-muted">No products yet.</td></tr><?php endif; ?>
                         </tbody>
                     </table>
                 </div>
