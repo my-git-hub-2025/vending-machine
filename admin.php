@@ -247,4 +247,4 @@ layoutHeader('Admin Panel');
         </div>
     </div>
 </div>
-<?php layoutFooter();
+<?php layoutFooter(); ?>

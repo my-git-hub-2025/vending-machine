@@ -54,4 +54,4 @@ layoutHeader('Login');
         </div>
     </div>
 </div>
-<?php layoutFooter();
+<?php layoutFooter(); ?>

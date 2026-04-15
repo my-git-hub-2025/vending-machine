@@ -51,4 +51,4 @@ layoutHeader('Vending Machine');
         </div>
     <?php endfor; ?>
 </div>
-<?php layoutFooter();
+<?php layoutFooter(); ?>

@@ -64,4 +64,4 @@ layoutHeader('Register');
         </div>
     </div>
 </div>
-<?php layoutFooter();
+<?php layoutFooter(); ?>
