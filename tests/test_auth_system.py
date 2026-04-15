@@ -61,6 +61,9 @@ class AuthSystemTests(unittest.TestCase):
     def test_register_user_empty_password_fails(self) -> None:
         self.assertFalse(self.auth.register_user("alice", ""))
 
+    def test_register_user_username_with_colon_fails(self) -> None:
+        self.assertFalse(self.auth.register_user("alice:admin", "secret"))
+
 
 if __name__ == "__main__":
     unittest.main()

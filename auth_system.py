@@ -65,7 +65,7 @@ class AuthSystem:
                 f.write(f"{username}:{password_hash}\n")
 
     def register_user(self, username: str, password: str) -> bool:
-        if not username or not password:
+        if not username or not password or ":" in username:
             return False
         users = self._load_users()
         if username in users:
