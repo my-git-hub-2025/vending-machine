@@ -35,6 +35,13 @@ class AuthSystemTests(unittest.TestCase):
         self.assertFalse(self.auth.login("ghost", "secret"))
         self.assertFalse(self.auth.is_logged_in("ghost"))
 
+    def test_login_empty_username_fails(self) -> None:
+        self.assertFalse(self.auth.login("", "secret"))
+
+    def test_login_empty_password_fails(self) -> None:
+        self.auth.register_user("alice", "secret")
+        self.assertFalse(self.auth.login("alice", ""))
+
     def test_logout_success(self) -> None:
         self.auth.register_user("alice", "secret")
         self.auth.login("alice", "secret")

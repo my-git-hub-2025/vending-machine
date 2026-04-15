@@ -7,9 +7,12 @@ from pathlib import Path
 
 
 class AuthSystem:
+    _PBKDF2_ITERATIONS = 600_000
+
     def __init__(self, db_path: str = "users.txt") -> None:
         self.db_path = Path(db_path)
         self.logged_in_users: set[str] = set()
+        self._dummy_stored_password = self._hash_password("dummy-password")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.db_path.touch(exist_ok=True)
 
@@ -20,7 +23,7 @@ class AuthSystem:
             "sha256",
             password.encode("utf-8"),
             bytes.fromhex(salt),
-            200_000,
+            AuthSystem._PBKDF2_ITERATIONS,
         ).hex()
         return f"{salt}${derived_key}"
 
@@ -33,7 +36,7 @@ class AuthSystem:
             "sha256",
             password.encode("utf-8"),
             bytes.fromhex(salt),
-            200_000,
+            AuthSystem._PBKDF2_ITERATIONS,
         ).hex()
         return hmac.compare_digest(derived_key, expected_derived_key)
 
@@ -65,9 +68,9 @@ class AuthSystem:
 
     def login(self, username: str, password: str) -> bool:
         users = self._load_users()
-        if username not in users:
-            return False
-        if not self._verify_password(password, users[username]):
+        stored_password = users.get(username, self._dummy_stored_password)
+        is_valid_password = self._verify_password(password, stored_password)
+        if username not in users or not is_valid_password:
             return False
         self.logged_in_users.add(username)
         return True
