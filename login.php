@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim((string)($_POST['username'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
 
-    if (isRateLimited('login', 5, 900)) {
+    if (isRateLimited('login', AUTH_RATE_LIMIT_MAX_ATTEMPTS, AUTH_RATE_LIMIT_WINDOW_SECONDS)) {
         $error = 'Too many failed login attempts. Please try again later.';
     } else {
         foreach (getUsers() as $user) {
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        registerRateLimitFailure('login');
+        registerRateLimitFailure('login', AUTH_RATE_LIMIT_WINDOW_SECONDS);
         $error = 'Invalid username or password.';
     }
 }

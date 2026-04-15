@@ -14,6 +14,8 @@ const USERS_FILE = DATA_DIR . '/users.txt';
 const CONFIG_FILE = DATA_DIR . '/machine_config.txt';
 const PRODUCTS_FILE = DATA_DIR . '/products.txt';
 const ASSIGNMENTS_FILE = DATA_DIR . '/slot_assignments.txt';
+const AUTH_RATE_LIMIT_WINDOW_SECONDS = 900;
+const AUTH_RATE_LIMIT_MAX_ATTEMPTS = 5;
 
 initializeDataFiles();
 
@@ -116,10 +118,10 @@ function isRateLimited(string $key, int $maxAttempts, int $windowSeconds): bool
     return $count >= $maxAttempts;
 }
 
-function registerRateLimitFailure(string $key): void
+function registerRateLimitFailure(string $key, int $windowSeconds): void
 {
     $existing = $_SESSION['rate_limit'][$key] ?? null;
-    if (!is_array($existing) || (time() - (int)($existing['window_start'] ?? 0)) > 900) {
+    if (!is_array($existing) || (time() - (int)($existing['window_start'] ?? 0)) > $windowSeconds) {
         $_SESSION['rate_limit'][$key] = [
             'window_start' => time(),
             'count' => 1,

@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim((string)($_POST['username'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
 
-    if (isRateLimited('register', 5, 900)) {
+    if (isRateLimited('register', AUTH_RATE_LIMIT_MAX_ATTEMPTS, AUTH_RATE_LIMIT_WINDOW_SECONDS)) {
         $error = 'Too many registration attempts. Please try again later.';
     } elseif ($username === '' || $password === '') {
         $error = 'Username and password are required.';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($error !== '') {
-        registerRateLimitFailure('register');
+        registerRateLimitFailure('register', AUTH_RATE_LIMIT_WINDOW_SECONDS);
     }
 }
 
