@@ -73,6 +73,68 @@ function h(string $value): string
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function sendSecurityHeaders(): void
+{
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: no-referrer');
+    header("Content-Security-Policy: default-src 'self'; style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+}
+
+function getCsrfToken(): string
+{
+    if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token']) || $_SESSION['csrf_token'] === '') {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function requireValidCsrfToken(): void
+{
+    $sessionToken = (string)($_SESSION['csrf_token'] ?? '');
+    $providedToken = (string)($_POST['csrf_token'] ?? '');
+
+    if ($sessionToken === '' || $providedToken === '' || !hash_equals($sessionToken, $providedToken)) {
+        http_response_code(400);
+        exit('Invalid CSRF token.');
+    }
+}
+
+function isRateLimited(string $key, int $maxAttempts, int $windowSeconds): bool
+{
+    $store = $_SESSION['rate_limit'][$key] ?? null;
+    if (!is_array($store)) {
+        return false;
+    }
+
+    $windowStart = (int)($store['window_start'] ?? 0);
+    $count = (int)($store['count'] ?? 0);
+    if ((time() - $windowStart) > $windowSeconds) {
+        return false;
+    }
+
+    return $count >= $maxAttempts;
+}
+
+function registerRateLimitFailure(string $key): void
+{
+    $existing = $_SESSION['rate_limit'][$key] ?? null;
+    if (!is_array($existing) || (time() - (int)($existing['window_start'] ?? 0)) > 900) {
+        $_SESSION['rate_limit'][$key] = [
+            'window_start' => time(),
+            'count' => 1,
+        ];
+        return;
+    }
+
+    $_SESSION['rate_limit'][$key]['count'] = (int)($_SESSION['rate_limit'][$key]['count'] ?? 0) + 1;
+}
+
+function clearRateLimit(string $key): void
+{
+    unset($_SESSION['rate_limit'][$key]);
+}
+
 function isLoggedIn(): bool
 {
     return isset($_SESSION['user']);

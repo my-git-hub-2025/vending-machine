@@ -11,6 +11,7 @@ $errors = [];
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
     $action = (string)($_POST['action'] ?? '');
 
     if ($action === 'save_config') {
@@ -146,6 +147,7 @@ layoutHeader('Admin Panel');
             <div class="card-body">
                 <h2 class="h5">Machine Configuration</h2>
                 <form method="post" class="vstack gap-2">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <input type="hidden" name="action" value="save_config">
                     <div>
                         <label class="form-label">Rows</label>
@@ -171,6 +173,7 @@ layoutHeader('Admin Panel');
             <div class="card-body">
                 <h2 class="h5">Stock Products</h2>
                 <form method="post" class="vstack gap-2 mb-3">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <input type="hidden" name="action" value="save_product">
                     <input type="hidden" name="product_id" value="0">
                     <input class="form-control" name="name" placeholder="Product name" required>
@@ -187,6 +190,7 @@ layoutHeader('Admin Panel');
                             <tr>
                                 <td colspan="4">
                                     <form method="post" class="row g-1 align-items-center">
+                                        <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                                         <input type="hidden" name="action" value="save_product">
                                         <input type="hidden" name="product_id" value="<?= h((string)$product['id']) ?>">
                                         <div class="col-4"><input class="form-control form-control-sm" name="name" value="<?= h((string)$product['name']) ?>" required></div>
@@ -210,6 +214,7 @@ layoutHeader('Admin Panel');
             <div class="card-body">
                 <h2 class="h5">Assign Slot</h2>
                 <form method="post" class="vstack gap-2">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <input type="hidden" name="action" value="assign_slot">
                     <div>
                         <label class="form-label">Column</label>

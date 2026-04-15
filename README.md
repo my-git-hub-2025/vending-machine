@@ -6,6 +6,9 @@ Simple PHP vending machine website with Bootstrap and Font Awesome.
 
 - User registration and login using `data/users.txt`
 - First registered account automatically becomes `admin`
+- CSRF protection on all POST forms
+- Basic rate limiting for login and registration attempts
+- Security headers (CSP, frame protection, no-sniff, referrer policy)
 - User-facing vending machine view with item, price, and slot quantity
 - Admin panel to:
   - Configure machine rows, columns, and slots per column
@@ -34,3 +37,8 @@ Open:
 - `http://localhost:8000/login.php` to log in
 - `http://localhost:8000/index.php` to view vending machine
 - `http://localhost:8000/admin.php` for admin features
+
+## Security notes
+
+- Registration requires a password with at least 8 characters.
+- `data/.htaccess` denies direct data-file access on Apache-based deployments.

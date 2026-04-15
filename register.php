@@ -12,11 +12,16 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
     $username = trim((string)($_POST['username'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
 
-    if ($username === '' || $password === '') {
+    if (isRateLimited('register', 5, 900)) {
+        $error = 'Too many registration attempts. Please try again later.';
+    } elseif ($username === '' || $password === '') {
         $error = 'Username and password are required.';
+    } elseif (strlen($password) < 8) {
+        $error = 'Password must be at least 8 characters long.';
     } else {
         $users = getUsers();
         foreach ($users as $user) {
@@ -35,9 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role' => $role,
             ];
             saveUsers($users);
+            clearRateLimit('register');
             header('Location: /login.php');
             exit;
         }
+    }
+
+    if ($error !== '') {
+        registerRateLimitFailure('register');
     }
 }
 
@@ -50,6 +60,7 @@ layoutHeader('Register');
                 <h1 class="h4 mb-3"><i class="fa-solid fa-user-plus"></i> Register</h1>
                 <?php if ($error): ?><div class="alert alert-danger"><?= h($error) ?></div><?php endif; ?>
                 <form method="post">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input class="form-control" name="username" required>

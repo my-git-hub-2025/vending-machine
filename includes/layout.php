@@ -7,6 +7,7 @@ require_once __DIR__ . '/bootstrap.php';
 function layoutHeader(string $title): void
 {
     $user = currentUser();
+    sendSecurityHeaders();
     ?>
     <!DOCTYPE html>
     <html lang="en">

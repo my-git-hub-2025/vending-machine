@@ -12,23 +12,30 @@ if (isLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireValidCsrfToken();
     $username = trim((string)($_POST['username'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
 
-    foreach (getUsers() as $user) {
-        if (strcasecmp((string)$user['username'], $username) === 0 && password_verify($password, (string)$user['password_hash'])) {
-            session_regenerate_id(true);
-            $_SESSION['user'] = [
-                'id' => $user['id'],
-                'username' => $user['username'],
-                'role' => $user['role'],
-            ];
-            header('Location: /index.php');
-            exit;
+    if (isRateLimited('login', 5, 900)) {
+        $error = 'Too many failed login attempts. Please try again later.';
+    } else {
+        foreach (getUsers() as $user) {
+            if (strcasecmp((string)$user['username'], $username) === 0 && password_verify($password, (string)$user['password_hash'])) {
+                session_regenerate_id(true);
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                    'role' => $user['role'],
+                ];
+                clearRateLimit('login');
+                header('Location: /index.php');
+                exit;
+            }
         }
-    }
 
-    $error = 'Invalid username or password.';
+        registerRateLimitFailure('login');
+        $error = 'Invalid username or password.';
+    }
 }
 
 layoutHeader('Login');
@@ -40,6 +47,7 @@ layoutHeader('Login');
                 <h1 class="h4 mb-3"><i class="fa-solid fa-right-to-bracket"></i> Login</h1>
                 <?php if ($error): ?><div class="alert alert-danger"><?= h($error) ?></div><?php endif; ?>
                 <form method="post">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input class="form-control" name="username" required>
