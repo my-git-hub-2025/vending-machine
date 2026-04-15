@@ -12,7 +12,7 @@ class AuthSystem:
     def __init__(self, db_path: str = "users.txt") -> None:
         self.db_path = Path(db_path)
         self.logged_in_users: set[str] = set()
-        self._dummy_stored_password = self._hash_password("dummy-password")
+        self._dummy_stored_password = self._hash_password(secrets.token_urlsafe(32))
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.db_path.touch(exist_ok=True)
 
@@ -70,14 +70,18 @@ class AuthSystem:
         if not username or not password:
             return False
         users = self._load_users()
+        user_exists = username in users
         stored_password = users.get(username, self._dummy_stored_password)
         is_valid_password = self._verify_password(password, stored_password)
-        if username not in users or not is_valid_password:
+        if not (user_exists and is_valid_password):
             return False
         self.logged_in_users.add(username)
         return True
 
     def logout(self, username: str) -> bool:
+        users = self._load_users()
+        if username not in users:
+            return False
         if username not in self.logged_in_users:
             return False
         self.logged_in_users.remove(username)
