@@ -52,6 +52,9 @@ class AuthSystemTests(unittest.TestCase):
         self.auth.register_user("alice", "secret")
         self.assertFalse(self.auth.logout("alice"))
 
+    def test_logout_nonexistent_user_fails(self) -> None:
+        self.assertFalse(self.auth.logout("ghost"))
+
     def test_register_user_empty_username_fails(self) -> None:
         self.assertFalse(self.auth.register_user("", "secret"))
 

@@ -67,6 +67,8 @@ class AuthSystem:
         return True
 
     def login(self, username: str, password: str) -> bool:
+        if not username or not password:
+            return False
         users = self._load_users()
         stored_password = users.get(username, self._dummy_stored_password)
         is_valid_password = self._verify_password(password, stored_password)
