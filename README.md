@@ -1,44 +1,28 @@
 # vending-machine
 
-Simple PHP vending machine website with Bootstrap and Font Awesome.
+Simple user login/logout system with a text-file database.
 
-## Features
+Session state is in-memory only (users are logged out when the process restarts).
 
-- User registration and login using `data/users.txt`
-- First registered account automatically becomes `admin`
-- CSRF protection on all POST forms
-- Basic rate limiting for login and registration attempts
-- Security headers (CSP, frame protection, no-sniff, referrer policy)
-- User-facing vending machine view with item, price, and slot quantity
-- Admin panel to:
-  - Configure machine rows, columns, and slots per column
-  - Manage stock products with price and stock quantity
-  - Assign stock products into machine slots with slot quantity
-- Data persistence using text files (`.txt` JSON format)
+## Files
+- `auth_system.py`: login/logout implementation
+- `users.txt`: text-file user database (created automatically)
+- `tests/test_auth_system.py`: unit tests
 
-## Data files
-
-- `data/users.txt`
-- `data/machine_config.txt`
-- `data/products.txt`
-- `data/slot_assignments.txt`
-
-## Run locally
-
-From repo root:
-
+## Run tests
 ```bash
-php -S localhost:8000
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
-Open:
+## Quick usage
+```python
+from auth_system import AuthSystem
 
-- `http://localhost:8000/register.php` to create first admin account
-- `http://localhost:8000/login.php` to log in
-- `http://localhost:8000/index.php` to view vending machine
-- `http://localhost:8000/admin.php` for admin features
+auth = AuthSystem("users.txt")
+auth.register_user("alice", "secret123")
+auth.login("alice", "secret123")
+auth.logout("alice")
+```
 
-## Security notes
-
-- Registration requires a password with at least 8 characters.
-- `data/.htaccess` denies direct data-file access on Apache-based deployments.
+## Note
+- Login sessions are not persisted across restarts.
