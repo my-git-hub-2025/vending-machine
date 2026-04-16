@@ -55,9 +55,9 @@ layoutHeader('Register');
 ?>
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card shadow-sm">
+        <div class="card surface-card">
             <div class="card-body">
-                <h1 class="h4 mb-3"><i class="fa-solid fa-user-plus"></i> Register</h1>
+                <h1 class="vm-page-title h4 mb-3"><i class="fa-solid fa-user-plus"></i> Register</h1>
                 <?php if ($error): ?><div class="alert alert-danger"><?= h($error) ?></div><?php endif; ?>
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
@@ -69,7 +69,7 @@ layoutHeader('Register');
                         <label class="form-label" for="password">Password</label>
                         <input id="password" class="form-control" type="password" name="password" required>
                     </div>
-                    <button class="btn btn-primary w-100">Create account</button>
+                    <button class="btn btn-vm-primary w-100">Create account</button>
                 </form>
             </div>
         </div>
