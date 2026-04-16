@@ -9,6 +9,23 @@ requireAdmin();
 
 $errors = [];
 $success = '';
+$countAdminUsers = static function (array $users): int {
+    $adminCount = 0;
+    foreach ($users as $user) {
+        if ((string)($user['role'] ?? '') === 'admin') {
+            $adminCount++;
+        }
+    }
+    return $adminCount;
+};
+$findUserIndexById = static function (array $users, int $id): ?int {
+    foreach ($users as $index => $user) {
+        if ((int)($user['id'] ?? 0) === $id) {
+            return $index;
+        }
+    }
+    return null;
+};
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireValidCsrfToken();
@@ -51,23 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
                 $created = true;
             } else {
-                $foundIndex = null;
-                foreach ($users as $index => $user) {
-                    if ((int)($user['id'] ?? 0) === $id) {
-                        $foundIndex = $index;
-                        break;
-                    }
-                }
+                $foundIndex = $findUserIndexById($users, $id);
 
                 if ($foundIndex === null) {
                     $errors[] = 'User not found for update.';
                 } else {
-                    $adminCount = 0;
-                    foreach ($users as $user) {
-                        if ((string)($user['role'] ?? '') === 'admin') {
-                            $adminCount++;
-                        }
-                    }
+                    $adminCount = $countAdminUsers($users);
 
                     $targetUserRole = (string)($users[$foundIndex]['role'] ?? 'user');
                     if ($targetUserRole === 'admin' && $role !== 'admin' && $adminCount <= 1) {
@@ -97,25 +103,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete_user') {
         $id = (int)($_POST['user_id'] ?? 0);
         $users = getUsers();
-        $foundIndex = null;
-        foreach ($users as $index => $user) {
-            if ((int)($user['id'] ?? 0) === $id) {
-                $foundIndex = $index;
-                break;
-            }
-        }
+        $foundIndex = $findUserIndexById($users, $id);
 
         if ($foundIndex === null) {
             $errors[] = 'User not found for deletion.';
         } elseif ((int)(currentUser()['id'] ?? 0) === $id) {
             $errors[] = 'You cannot delete your own account.';
         } else {
-            $adminCount = 0;
-            foreach ($users as $user) {
-                if ((string)($user['role'] ?? '') === 'admin') {
-                    $adminCount++;
-                }
-            }
+            $adminCount = $countAdminUsers($users);
 
             $targetUserRole = (string)($users[$foundIndex]['role'] ?? 'user');
             if ($targetUserRole === 'admin' && $adminCount <= 1) {
