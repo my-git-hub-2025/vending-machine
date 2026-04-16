@@ -9,10 +9,119 @@ requireAdmin();
 
 $errors = [];
 $success = '';
+$countAdminUsers = static function (array $users): int {
+    $adminCount = 0;
+    foreach ($users as $user) {
+        if ((string)($user['role'] ?? '') === 'admin') {
+            $adminCount++;
+        }
+    }
+    return $adminCount;
+};
+$findUserIndexById = static function (array $users, int $id): ?int {
+    foreach ($users as $index => $user) {
+        if ((int)($user['id'] ?? 0) === $id) {
+            return $index;
+        }
+    }
+    return null;
+};
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireValidCsrfToken();
     $action = (string)($_POST['action'] ?? '');
+
+    if ($action === 'save_user') {
+        $id = (int)($_POST['user_id'] ?? 0);
+        $username = trim((string)($_POST['username'] ?? ''));
+        $password = (string)($_POST['password'] ?? '');
+        $role = (string)($_POST['role'] ?? 'user');
+        $users = getUsers();
+
+        if ($username === '') {
+            $errors[] = 'Username is required.';
+        } elseif (!in_array($role, ['admin', 'user'], true)) {
+            $errors[] = 'Invalid user role.';
+        } elseif ($id <= 0 && strlen($password) < 8) {
+            $errors[] = 'Password must be at least 8 characters long for new users.';
+        } elseif ($id > 0 && $password !== '' && strlen($password) < 8) {
+            $errors[] = 'Password must be at least 8 characters long.';
+        } else {
+            foreach ($users as $existingUser) {
+                $existingId = (int)($existingUser['id'] ?? 0);
+                $existingUsername = (string)($existingUser['username'] ?? '');
+                if ($existingId !== $id && strcasecmp($existingUsername, $username) === 0) {
+                    $errors[] = 'Username already exists.';
+                    break;
+                }
+            }
+        }
+
+        if (count($errors) === 0) {
+            $created = false;
+            if ($id <= 0) {
+                $users[] = [
+                    'id' => nextId($users),
+                    'username' => $username,
+                    'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                    'role' => $role,
+                ];
+                $created = true;
+            } else {
+                $foundIndex = $findUserIndexById($users, $id);
+
+                if ($foundIndex === null) {
+                    $errors[] = 'User not found for update.';
+                } else {
+                    $adminCount = $countAdminUsers($users);
+
+                    $targetUserRole = (string)($users[$foundIndex]['role'] ?? 'user');
+                    if ($targetUserRole === 'admin' && $role !== 'admin' && $adminCount <= 1) {
+                        $errors[] = 'At least one admin account is required.';
+                    } else {
+                        $users[$foundIndex]['username'] = $username;
+                        $users[$foundIndex]['role'] = $role;
+                        if ($password !== '') {
+                            $users[$foundIndex]['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+                        }
+
+                        if ((int)(currentUser()['id'] ?? 0) === $id) {
+                            $_SESSION['user']['username'] = $username;
+                            $_SESSION['user']['role'] = $role;
+                        }
+                    }
+                }
+            }
+
+            if (count($errors) === 0) {
+                saveUsers($users);
+                $success = $created ? 'User created.' : 'User updated.';
+            }
+        }
+    }
+
+    if ($action === 'delete_user') {
+        $id = (int)($_POST['user_id'] ?? 0);
+        $users = getUsers();
+        $foundIndex = $findUserIndexById($users, $id);
+
+        if ($foundIndex === null) {
+            $errors[] = 'User not found for deletion.';
+        } elseif ((int)(currentUser()['id'] ?? 0) === $id) {
+            $errors[] = 'You cannot delete your own account.';
+        } else {
+            $adminCount = $countAdminUsers($users);
+
+            $targetUserRole = (string)($users[$foundIndex]['role'] ?? 'user');
+            if ($targetUserRole === 'admin' && $adminCount <= 1) {
+                $errors[] = 'At least one admin account is required.';
+            } else {
+                array_splice($users, $foundIndex, 1);
+                saveUsers($users);
+                $success = 'User deleted.';
+            }
+        }
+    }
 
     if ($action === 'save_config') {
         $rows = max(1, (int)($_POST['rows'] ?? 1));
@@ -132,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $config = getMachineConfig();
 $products = getProducts();
 $assignments = getAssignments();
+$users = getUsers();
 $slotsCsv = implode(',', array_map(static fn ($v): string => (string)$v, $config['slots_per_column']));
 
 layoutHeader('Admin Panel');
@@ -256,6 +366,80 @@ layoutHeader('Admin Panel');
                     <?php endforeach; ?>
                     <?php if (count($assignments) === 0): ?><li class="list-group-item px-0 text-muted">No assignments yet.</li><?php endif; ?>
                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="card surface-card">
+            <div class="card-body">
+                <h2 class="h5">Users</h2>
+                <form method="post" class="row g-2 align-items-end mb-3">
+                    <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
+                    <input type="hidden" name="action" value="save_user">
+                    <input type="hidden" name="user_id" value="0">
+                    <div class="col-md-4">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" name="username" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" name="password" minlength="8" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role" required>
+                            <option value="user">user</option>
+                            <option value="admin">admin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-vm-primary w-100">Add user</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Username</th><th>Role</th><th>Password</th><th>Update</th><th>Delete</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td>
+                                    <form method="post" class="d-flex gap-2 align-items-center">
+                                        <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
+                                        <input type="hidden" name="action" value="save_user">
+                                        <input type="hidden" name="user_id" value="<?= h((string)$user['id']) ?>">
+                                        <input class="form-control form-control-sm" name="username" value="<?= h((string)$user['username']) ?>" required>
+                                </td>
+                                <td>
+                                        <select class="form-select form-select-sm" name="role" required>
+                                            <option value="user" <?= (string)$user['role'] === 'user' ? 'selected' : '' ?>>user</option>
+                                            <option value="admin" <?= (string)$user['role'] === 'admin' ? 'selected' : '' ?>>admin</option>
+                                        </select>
+                                </td>
+                                <td>
+                                        <input type="password" class="form-control form-control-sm" name="password" placeholder="Leave blank to keep" minlength="8">
+                                </td>
+                                <td>
+                                        <button class="btn btn-sm btn-vm-secondary">Update</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post">
+                                        <input type="hidden" name="csrf_token" value="<?= h(getCsrfToken()) ?>">
+                                        <input type="hidden" name="action" value="delete_user">
+                                        <input type="hidden" name="user_id" value="<?= h((string)$user['id']) ?>">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this user?')">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <?php if (count($users) === 0): ?><tr><td colspan="5" class="text-muted">No users yet.</td></tr><?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
